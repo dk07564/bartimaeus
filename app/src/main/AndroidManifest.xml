@@ -24,6 +24,7 @@
             android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme"/>
+
     </application>
 
 </manifest>
