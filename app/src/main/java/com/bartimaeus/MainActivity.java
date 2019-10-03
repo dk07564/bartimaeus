@@ -3,18 +3,11 @@ package com.bartimaeus;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.util.Locale;
-
-
 public class MainActivity extends AppCompatActivity {
-    private IntentIntegrator barCodeScan;
+    private IntentIntegrator barCodeScan = new IntentIntegrator(this);
     private Intent intent;
 
     String barCodeNumber;
@@ -23,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         setBarCodeScan();
     }
 
@@ -31,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    //바코드가 스캔되었을 때 결과값을 넘겨줌
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -42,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    //바코드 스캔을 위한 함수
     public  void setBarCodeScan(){
-        barCodeScan= new IntentIntegrator(this);
+        //barCodeScan= new IntentIntegrator(this);
         barCodeScan.setCaptureActivity(AnyOrientationCaptureActivity.class);
         barCodeScan.setOrientationLocked(false);
         barCodeScan.initiateScan();
