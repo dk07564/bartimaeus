@@ -24,6 +24,9 @@ public class Information extends AppCompatActivity {
         intent=getIntent();
         barCodeNumber=intent.getStringExtra("barCodeNumber");
 
+            scan.setText(barCodeNumber);
+
+
 
         //TTS기능 처리
         tts= new TextToSpeech(this, new TextToSpeech.OnInitListener() {
