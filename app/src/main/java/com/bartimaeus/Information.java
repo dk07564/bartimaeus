@@ -2,74 +2,120 @@ package com.bartimaeus;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.widget.TextView;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
+
+
 
 public class Information extends AppCompatActivity {
     private TextToSpeech tts;
     private Intent intent;
-    TextView scan;
+    TextView scan, tv_name, tv_brand, tv_material, tv_allergy;
     String barCode;
-    String barCodeNumber;
+    String barCodeNumber, barCodeNum;
+    String name, brand, nation, allergy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_information);
-        scan=findViewById(R.id.textView);
+        tv_name = findViewById(R.id.name);
+        tv_brand = findViewById(R.id.brand);
+        tv_material = findViewById(R.id.material);
+        tv_allergy = findViewById(R.id.allergy);
 
         //MainActivity에서 값을 전달 받음
-        intent=getIntent();
-        barCodeNumber=intent.getStringExtra("barCodeNumber");
+        intent = getIntent();
+        barCodeNumber = intent.getStringExtra("barCodeNumber");
+        barCodeNumber = "8801111913928";
 
-            scan.setText(barCodeNumber);
+        getData(barCodeNumber);
 
+    }
 
+    public void getData(String number){
+        try {
+            AssetManager am = getAssets();
+            InputStream inputStream = am.open("Food.xls");
 
-        //TTS기능 처리
-        tts= new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int i) {
-                tts.setLanguage(Locale.KOREA);
+            POIFSFileSystem poifsFileSystem = new POIFSFileSystem(inputStream);
+            HSSFWorkbook workbook = new HSSFWorkbook(poifsFileSystem);
+            HSSFSheet sheet = workbook.getSheetAt(0);
 
-//                if(barCodeNumber.equals("8801094502669")){
-//                    scan.setText(barCode);
-//                    tts.speak(barCode,TextToSpeech.QUEUE_FLUSH, null);
-//                }else{
-//                    intent.putExtra("barCodeNumber", barCodeNumber);
-//                    scan.setText(barCodeNumber);
-//                }
-                switch (barCodeNumber){
-                    case "8801062893546":
-                        barCode="롯데 ABC 초코 쿠키\n코코아분말 5%, 과자 43%, 265칼로리.\n설탕이 들어가 단 맛이 강한 제품이며, 우유, 대두, 밀, 달걀로 인한 알레르기가 유발될 수 있는 제품입니다.";
-                        scan.setText(barCode);
-                        tts.speak(barCode,TextToSpeech.QUEUE_FLUSH, null);
-                        break;
+            int barNum = sheet.getLastRowNum();
 
-                    case "8801062009374":
-                        barCode="롯데 씨리얼 초코\n준초콜릿 54%, 귀리분말 30%, 215칼로리.\n설탕이 들어가 단 맛이 강한 제품이며, 우유, 대두, 밀, 달걀로 인한 알레르기가 유발될 수 있는 제품입니다.";
-                        scan.setText(barCode);
-                        tts.speak(barCode,TextToSpeech.QUEUE_FLUSH, null);
-                        break;
+            for(int i=1; i<barNum; i++){
+                Row row = sheet.getRow(i);
+                Row nameRow = sheet.getRow(i);
+                Row brandRow = sheet.getRow(i);
+                Row nationRow = sheet.getRow(i);
+                Row allergyRow = sheet.getRow(i);
 
-                    case "8801155731632":
-                        barCode="동원 덴마크 딸기딸기 우유\n탈지분유 미국산 6%, 유크림 5%, 딸기 농축액 1%, 220칼로리.\n설탕이 들어가 단 맛이 강한 제품이며, 우유로 인한 알레르기가 유발될 수 있는 제품입니다.";
-                        scan.setText(barCode);
-                        tts.speak(barCode,TextToSpeech.QUEUE_FLUSH, null);
-                        break;
+                Cell cell = row.getCell(0);
+                Cell nameCell = nameRow.getCell(1);
+                Cell brandCell = brandRow.getCell(2);
+                Cell nationCell = nationRow.getCell(3);
+                Cell allergyCell = allergyRow.getCell(4);
 
-                    case "8801155731625":
-                        barCode="동원 덴마크 초코초코 우유\n원유 국산 200%, 혼합분유 네덜란드산 5%, 유크림 5%, 코코아분말 싱가포르산 1.7%, 330칼로리.\n설탕이 들어가 단 맛이 강한 제품이며, 우유로 인한 알레르기가 유발될 수 있는 제품입니다.";
-                        scan.setText(barCode);
-                        tts.speak(barCode,TextToSpeech.QUEUE_FLUSH, null);
-                        break;
+                String productNumber = cell.getStringCellValue();
+                Log.d("I", String.valueOf(i));
+                Log.d("상품", productNumber);
+
+                if(productNumber.equals(number)){
+                    name=nameCell.getStringCellValue();
+                    brand=brandCell.getStringCellValue();
+                    nation=nationCell.getStringCellValue();
+                    allergy=allergyCell.getStringCellValue();
+                    Log.d("ALLERGY", allergy);
+
+                    tts= new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+                        @Override
+                        public void onInit(int i) {
+                            tts.setLanguage(Locale.KOREA);
+
+                            tv_name.setText("이름: "+name);
+                            tv_brand.setText("제조사: "+brand);
+                            tv_material.setText("제조 국가:"+nation);
+                            tv_allergy.setText("알레르기 정보: "+allergy);
+
+                            barCode ="이름: "+ name + "\n" + "제조사: "+ brand + "\n" + "제조 국가: "+ nation + "\n" + "알레르기 정보: "+ allergy;
+
+                            tts.speak(barCode, TextToSpeech.QUEUE_FLUSH, null);
+
+                        }
+                    });
+
+                    break;
+                }else{
 
                 }
+
             }
-        });
+
+        } catch (IOException e) {
+            Log.d("ERROR", "ERROR");
+
+        }
     }
+
+
+
 
     @Override
     public void onBackPressed(){
