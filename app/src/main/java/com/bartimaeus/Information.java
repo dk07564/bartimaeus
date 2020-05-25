@@ -43,7 +43,6 @@ public class Information extends AppCompatActivity {
         //MainActivity에서 값을 전달 받음
         intent = getIntent();
         barCodeNumber = intent.getStringExtra("barCodeNumber");
-        barCodeNumber = "8801111913928";
 
         getData(barCodeNumber);
 
